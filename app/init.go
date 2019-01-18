@@ -2,6 +2,11 @@ package app
 
 import (
 	"github.com/revel/revel"
+	"database/sql"
+	_ "github.com/go-sql-driver/mysql"
+
+	"fmt"
+	"os"
 )
 
 var (
@@ -11,6 +16,19 @@ var (
 	// BuildTime revel app build-time (ldflags)
 	BuildTime string
 )
+
+var DB *sql.DB
+
+func InitDB() {
+    connstring := fmt.Sprintf("%s:%s@/%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"), "test")
+
+    var err error
+    DB, err = sql.Open("mysql", connstring)
+    if err != nil {
+        panic(err)
+    }
+    println("DB Connected")
+}
 
 func init() {
 	// Filters is the default set of global filters.
@@ -34,7 +52,7 @@ func init() {
 	// revel.DevMode and revel.RunMode only work inside of OnAppStart. See Example Startup Script
 	// ( order dependent )
 	// revel.OnAppStart(ExampleStartupScript)
-	// revel.OnAppStart(InitDB)
+	revel.OnAppStart(InitDB)
 	// revel.OnAppStart(FillCache)
 }
 

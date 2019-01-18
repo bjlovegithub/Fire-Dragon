@@ -8,6 +8,8 @@ module:testrunner
 
 
 GET     /                                       App.Index
+GET     /board_wish                             App.BoardWish
+POST    /verify_google_id_token                 Auth.VerifyGoogleIdToken
 
 # Ignore favicon requests
 GET     /favicon.ico                            404
