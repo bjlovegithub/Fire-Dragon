@@ -8,7 +8,13 @@ module:testrunner
 
 
 GET     /                                       App.Index
-GET     /board_wish                             App.BoardWish
+GET     /board_wish                             App.GetBoardWish
+PUT     /feedback                               App.Feedback
+GET     /wish/:wish_id                          WishApp.GetWish
+DELETE  /wish/:wish_id                          WishApp.DeleteWish
+PATCH   /wish/:wish_id                          WishApp.UpdateThumb
+PUT     /wish/                                  WishApp.PutWish
+GET     /my_wish/:user_id                       WishApp.GetMyWish
 POST    /verify_google_id_token                 Auth.VerifyGoogleIdToken
 
 # Ignore favicon requests

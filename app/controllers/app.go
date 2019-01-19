@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"github.com/revel/revel"
+	"net/http"
 )
 
 type App struct {
@@ -17,7 +18,7 @@ type Wish struct {
 	FontColor string `json:"fontColor"`
 	BackgroundPic string `json:"backgroundPic"`
 	Thumbs int `json:"thumbs"`
-	CreatedTimestamp int `json::"createdTimestamp"`
+	CreatedTimestamp int `json:"createdTimestamp"`
 	UpdatedTimestamp int `json:"updatedTimestamp"`
 }
 
@@ -25,7 +26,7 @@ func (c App) Index() revel.Result {
 	return c.Render()
 }
 
-func (c App) BoardWish() revel.Result {
+func (c App) GetBoardWish() revel.Result {
 	wish1 := Wish{
 		Id: 1,
 		UserEmail: "abc@abc.com",
@@ -48,4 +49,9 @@ func (c App) BoardWish() revel.Result {
 	arr := [3]Wish{ wish1, wish2, wish3 }
 
 	return c.RenderJSON(arr)
+}
+
+func (c App) Feedback() revel.Result {
+	c.Response.Status = http.StatusOK
+	return c.RenderJSON(map[string]string{"status": "ok"})
 }
