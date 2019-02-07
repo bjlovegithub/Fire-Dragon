@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	// "encoding/json"	
+	
 	"github.com/revel/revel"
+
+	"Fire-Dragon/app"
 )
 
 type WishApp struct {
@@ -56,9 +60,24 @@ func (c WishApp) DeleteWish(wishId int64) revel.Result {
 	return c.RenderJSON("{}")
 }
 
+func query() {
+	app.DB.Query("select 1")
+}
+
 func (c WishApp) PutWish() revel.Result {
 	// get wish id from post data(if there is a id for the wish, for update).
-	c.Log.Info(c.Request.Header.Get("Authorization"))
+	jsonData := make(map[string]interface{})
+	c.Params.BindJSON(&jsonData)
+
+	/*
+	err := json.Unmarshal(c.Params.JSON, &jsonData)
+	if err != nil {
+		panic(err)
+	}
+*/
+
+	query()
+	print(jsonData["wish"].(string))
 	
 	return c.RenderJSON("{}")
 }
