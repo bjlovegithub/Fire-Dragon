@@ -1,9 +1,9 @@
 package app
 
 import (
-	"github.com/revel/revel"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/revel/revel"
 
 	"fmt"
 	"os"
@@ -20,14 +20,14 @@ var (
 var DB *sql.DB
 
 func InitDB() {
-    connstring := fmt.Sprintf("%s:%s@/%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"), "test")
+	connstring := fmt.Sprintf("%s:%s@/%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"), "test")
 
-    var err error
-    DB, err = sql.Open("mysql", connstring)
-    if err != nil {
-        panic(err)
-    }
-    println("DB Connected")
+	var err error
+	DB, err = sql.Open("mysql", connstring)
+	if err != nil {
+		panic(err)
+	}
+	println("DB Connected")
 }
 
 func init() {
