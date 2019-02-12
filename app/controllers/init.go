@@ -14,20 +14,21 @@ func Authenticate(c *revel.Controller) revel.Result {
 	jwtToken, err := getJWTToken(c)
 	if err != nil {
 		c.Response.Status = http.StatusBadRequest
-		return c.RenderJSON(map[string]interface{}{"message": "no jwt token"})
+		return c.RenderJSON(map[string]interface{}{"message": "Authentication Failed(no jwt token)"})
 	}
+	println("jwt token: " + jwtToken)
 
 	var claims jwt.MapClaims
 	claims, err = decodeToken(jwtToken)
 	if err != nil {
 		c.Response.Status = http.StatusUnauthorized
-		return c.RenderJSON(map[string]interface{}{"message": "invalid jwt token"})
+		return c.RenderJSON(map[string]interface{}{"message": "Authentication Failed(invalid jwt token)"})
 	}
 
 	_, found := claims["email"]
 	if !found {
 		c.Response.Status = http.StatusBadRequest
-		return c.RenderText("email not found in db")
+		return c.RenderJSON(map[string]interface{}{"message": "Authentication Failed(email not found in db)"})
 	}
 
 	return nil
@@ -74,6 +75,10 @@ func decodeToken(tokenString string) (jwt.MapClaims, error) {
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
 		return hmacSecret, nil
 	})
+
+	if err != nil {
+		return nil, err
+	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {

@@ -107,9 +107,30 @@ func (c WishApp) PutWish() revel.Result {
 	return c.RenderJSON("{}")
 }
 
-func (c WishApp) UpdateThumb(wishId int64) revel.Result {
+func (c WishApp) UpdateThumb() revel.Result {
 	// update thumbs for the wish.
-	c.Log.Info(c.Request.Header.Get("Authorization"))
+	wishId, err := strconv.Atoi(c.Params.Get("wish_id"))
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Response.Status = http.StatusBadRequest
+		return c.RenderJSON(map[string]interface{}{"message": "Invalid Wish Id."})
+	}
+	userId, err := strconv.Atoi(c.Request.Header.Get("User-Id"))
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Response.Status = http.StatusBadRequest
+		return c.RenderJSON(map[string]interface{}{"message": "Invalid User Id."})
+	}
+
+	sql := fmt.Sprintf("UPDATE wish SET thumbs = thumbs + 1 WHERE id = %d", wishId)
+	_, err = app.DB.Query(sql)
+	if err != nil {
+		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
+		c.Response.Status = http.StatusInternalServerError
+		return c.RenderJSON(map[string]interface{}{"message": "Query DB Failed."})
+	}
+
+	c.Log.Info(string(userId))
 
 	return c.RenderJSON("{}")
 }
