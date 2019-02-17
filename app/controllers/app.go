@@ -43,6 +43,32 @@ func (c App) GetBoardWish() revel.Result {
 }
 
 func (c App) Feedback() revel.Result {
+	feedback := models.Feedback{}
+	err := json.Unmarshal(c.Params.JSON, &feedback)
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Response.Status = http.StatusBadRequest
+		return c.RenderJSON(map[string]interface{}{"message": "Parse feedback failed."})
+	}
+
+	wish.UserId, err = strconv.Atoi(c.Request.Header.Get("User-Id"))
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Response.Status = http.StatusBadRequest
+		return c.RenderJSON(map[string]interface{}{"message": "Invalid User Id."})
+	}
+
+	bytes, _ := json.Marshal(wish)
+	print(string(bytes))
+
+	sql, err := wish.UpsertSQL()
+
+	_, err := app.DB.Query(sql)
+	if err != nil {
+		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
+		panic(err)
+	}
+
 	c.Response.Status = http.StatusOK
 	return c.RenderJSON(map[string]string{"status": "ok"})
 }
