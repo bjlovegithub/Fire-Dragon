@@ -6,6 +6,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/revel/revel"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -48,7 +49,7 @@ func getJWTToken(c *revel.Controller) (token string, err error) {
 	return arr[1], nil
 }
 
-var hmacSecret = []byte{97, 48, 97, 50, 97, 98, 105, 49, 99, 102, 83, 53, 57, 98, 52, 54, 97, 102, 99, 12, 12, 13, 56, 34, 23, 16, 78, 67, 54, 34, 32, 21}
+var hmacSecret = []byte(os.Getenv("JWT_SECRECT_KEY"))
 
 func createJWT(info JWTInfo) string {
 	// create a new jwt token based on the token from google.
@@ -62,6 +63,8 @@ func createJWT(info JWTInfo) string {
 	if err != nil {
 		panic(err)
 	}
+
+	println(string(hmacSecret))
 
 	return tokenString
 }

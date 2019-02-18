@@ -6,9 +6,11 @@ import (
 
 /**
 CREATE TABLE feedback (
+  id INT  UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   email   VARCHAR(128) NOT NULL,
-  message VARCHAR(20480) NOT NULL,
+  message TEXT NOT NULL,
+  date    Timestamp
 )
 */
 
@@ -19,14 +21,8 @@ type Feedback struct {
 }
 
 func (u *Feedback) UpsertSQL() string {
+	// TODO - Clean message(SQL Injection, etc)
 	return fmt.Sprintf(`
-    INSERT INTO user_auth(jwt_sub, email, jwt, jwt_exp, auth_type)
-    VALUES('%s', '%s', '%s', FROM_UNIXTIME(%d), '%s')
-    ON DUPLICATE KEY UPDATE jwt = '%s', jwt_exp = FROM_UNIXTIME(%d)`,
-		u.JWTSub, u.Email, u.JWT, u.JWTExp, u.AuthType, u.JWT, u.JWTExp)
-}
-
-func (u *Feedback) String() string {
-	return fmt.Sprintf("User(%s), JWTSub(%s), Email(%s), JWT(%s), JWTExp(%d)",
-		u.UserId, u.JWTSub, u.Email, u.JWT, u.JWTExp)
+    INSERT INTO feedback(user_id, email, message, date)
+    VALUES(%d, '%s', '%s', now())`, u.UserId, u.Email, u.Message)
 }

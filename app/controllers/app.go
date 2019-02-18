@@ -3,8 +3,10 @@ package controllers
 import (
 	"Fire-Dragon/app"
 	"Fire-Dragon/app/models"
+	"encoding/json"
 	"github.com/revel/revel"
 	"net/http"
+	"strconv"
 
 	"fmt"
 )
@@ -51,19 +53,19 @@ func (c App) Feedback() revel.Result {
 		return c.RenderJSON(map[string]interface{}{"message": "Parse feedback failed."})
 	}
 
-	wish.UserId, err = strconv.Atoi(c.Request.Header.Get("User-Id"))
+	feedback.UserId, err = strconv.Atoi(c.Request.Header.Get("User-Id"))
 	if err != nil {
 		c.Log.Error(err.Error())
 		c.Response.Status = http.StatusBadRequest
 		return c.RenderJSON(map[string]interface{}{"message": "Invalid User Id."})
 	}
 
-	bytes, _ := json.Marshal(wish)
+	bytes, _ := json.Marshal(feedback)
 	print(string(bytes))
 
-	sql, err := wish.UpsertSQL()
+	sql := feedback.UpsertSQL()
 
-	_, err := app.DB.Query(sql)
+	_, err = app.DB.Query(sql)
 	if err != nil {
 		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
 		panic(err)
