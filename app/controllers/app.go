@@ -1,25 +1,18 @@
 package controllers
 
 import (
+	"Fire-Dragon/app"
+	"Fire-Dragon/app/models"
+	"encoding/json"
 	"github.com/revel/revel"
 	"net/http"
+	"strconv"
+
+	"fmt"
 )
 
 type App struct {
 	*revel.Controller
-}
-
-type Wish struct {
-	Id int `json:"id"`
-	UserEmail string `json:"userEmail"`
-	Wish string `json:"wish"`
-	FontFamily string `json:"fontFamily"`
-	FontSize int `json:"fontSize"`
-	FontColor string `json:"fontColor"`
-	BackgroundPic string `json:"backgroundPic"`
-	Thumbs int `json:"thumbs"`
-	CreatedTimestamp int `json:"createdTimestamp"`
-	UpdatedTimestamp int `json:"updatedTimestamp"`
 }
 
 func (c App) Index() revel.Result {
@@ -27,31 +20,57 @@ func (c App) Index() revel.Result {
 }
 
 func (c App) GetBoardWish() revel.Result {
-	wish1 := Wish{
-		Id: 1,
-		UserEmail: "abc@abc.com",
-		Wish: "this is my wish 1\nhappy",
-		FontFamily: "Helvetica",
-		FontSize: 16,
-		FontColor: "blue",
-		BackgroundPic: "https://images.pexels.com/photos/17679/pexels-photo.jpg?w=940&h=650&dpr=2&auto=compress&cs=tinysrgb",
-		Thumbs: 1,
-		CreatedTimestamp: 1525506395,
-		UpdatedTimestamp: 0,
+	sql := "SELECT id, user_id, wish, font_family, font_size, font_color, background_pic, thumbs, created_at, updated_at FROM wish ORDER BY RAND() LIMIT 3"
+
+	rows, err := app.DB.Query(sql)
+	if err != nil {
+		c.Log.Panic(fmt.Sprintf("Get board wishes failed, error: %s", err.Error()))
+	}
+	defer rows.Close()
+
+	wishes := make([]models.Wish, 0)
+	for rows.Next() {
+		wish := models.Wish{}
+		if err := rows.Scan(&wish.Id, &wish.UserId, &wish.Wish, &wish.FontFamily, &wish.FontSize, &wish.FontColor, &wish.BackgroundPic, &wish.Thumbs, &wish.CreatedTimestamp, &wish.UpdatedTimestamp); err != nil {
+			c.Log.Fatal(err.Error())
+		}
+		fmt.Printf("------------\nid %d name is %s\n", wish.Id, wish.Wish)
+		wishes = append(wishes, wish)
+	}
+	if err := rows.Err(); err != nil {
+		c.Log.Fatal(err.Error())
 	}
 
-	wish2 := wish1
-	wish2.Id = 2
-
-	wish3 := wish1
-	wish3.Id = 3
-
-	arr := [3]Wish{ wish1, wish2, wish3 }
-
-	return c.RenderJSON(arr)
+	return c.RenderJSON(wishes)
 }
 
 func (c App) Feedback() revel.Result {
+	feedback := models.Feedback{}
+	err := json.Unmarshal(c.Params.JSON, &feedback)
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Response.Status = http.StatusBadRequest
+		return c.RenderJSON(map[string]interface{}{"message": "Parse feedback failed."})
+	}
+
+	feedback.UserId, err = strconv.Atoi(c.Request.Header.Get("User-Id"))
+	if err != nil {
+		c.Log.Error(err.Error())
+		c.Response.Status = http.StatusBadRequest
+		return c.RenderJSON(map[string]interface{}{"message": "Invalid User Id."})
+	}
+
+	bytes, _ := json.Marshal(feedback)
+	print(string(bytes))
+
+	sql := feedback.UpsertSQL()
+
+	_, err = app.DB.Query(sql)
+	if err != nil {
+		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
+		panic(err)
+	}
+
 	c.Response.Status = http.StatusOK
 	return c.RenderJSON(map[string]string{"status": "ok"})
 }

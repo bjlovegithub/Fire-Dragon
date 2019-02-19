@@ -6,7 +6,7 @@ import (
 
 /**
 CREATE TABLE user_auth (
-  user_id INT(10) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   jwt_sub VARCHAR(128) NOT NULL,
   email   VARCHAR(128) NOT NULL,
   jwt     VARCHAR(2048) NOT NULL,
@@ -17,12 +17,12 @@ CREATE TABLE user_auth (
 */
 
 type UserAuth struct {
-	UserId             int
-	JWTSub             string
-	Email              string
-	JWT                string
-	JWTExp             int64
-	AuthType           string
+	UserId   int
+	JWTSub   string
+	Email    string
+	JWT      string
+	JWTExp   int64
+	AuthType string
 }
 
 func (u *UserAuth) UpsertSQL() string {
