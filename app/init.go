@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/revel/revel"
+	"net/http"
 
 	"fmt"
 	"os"
@@ -47,6 +48,13 @@ func init() {
 		revel.BeforeAfterFilter,       // Call the before and after filter functions
 		revel.ActionInvoker,           // Invoke the action.
 	}
+
+	httpRedirectServer := &http.Server{Addr: ":80", Handler: http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, fmt.Sprintf("https://%s%s", r.Host, r.RequestURI),
+				http.StatusMovedPermanently)
+		})}
+	go httpRedirectServer.ListenAndServe()
 
 	// Register startup functions with OnAppStart
 	// revel.DevMode and revel.RunMode only work inside of OnAppStart. See Example Startup Script
