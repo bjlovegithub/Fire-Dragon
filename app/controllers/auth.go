@@ -1,16 +1,16 @@
 package controllers
 
 import (
-	"github.com/revel/revel"
 	"encoding/json"
+	"fmt"
+	"github.com/revel/revel"
 	"google.golang.org/api/oauth2/v2"
 	"net/http"
 	"strconv"
-	"fmt"
 	"time"
 
-	"Fire-Dragon/app/models"
 	"Fire-Dragon/app"
+	"Fire-Dragon/app/models"
 )
 
 type Auth struct {
@@ -18,8 +18,8 @@ type Auth struct {
 }
 
 type JWTInfo struct {
-	email string
-	exp int64
+	email  string
+	exp    int64
 	userId int64
 }
 
@@ -57,10 +57,10 @@ func verifyIdToken(idToken string, c Auth) (*oauth2.Tokeninfo, error) {
 func (c Auth) VerifyGoogleIdToken() revel.Result {
 	// handle the app's request to verify user's google id token. response
 	// 200 status if the token is valid, and a new jwt token will be returned.
-	
+
 	var m map[string]interface{}
 	respMap := make(map[string]interface{})
-	
+
 	if err := json.Unmarshal(c.Params.JSON, &m); err == nil {
 		token := m["idToken"].(string)
 
@@ -75,8 +75,8 @@ func (c Auth) VerifyGoogleIdToken() revel.Result {
 			}
 			// save user login info into db.
 			now := time.Now()
-			jwtInfo := persistAuth(token, info.Email, info.Audience, info.ExpiresIn + now.Unix(), c)
-			
+			jwtInfo := persistAuth(token, info.Email, info.Audience, info.ExpiresIn+now.Unix(), c)
+
 			// create a new jwt token, which will be used as an auth for the following requests.
 			token = createJWT(jwtInfo)
 
