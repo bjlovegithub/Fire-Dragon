@@ -25,12 +25,15 @@ type UserAuth struct {
 	AuthType string
 }
 
-func (u *UserAuth) UpsertSQL() string {
-	return fmt.Sprintf(`
+func (u *UserAuth) UpsertSQL() (string, [7]interface{}) {
+	sql := `
     INSERT INTO user_auth(jwt_sub, email, jwt, jwt_exp, auth_type)
-    VALUES('%s', '%s', '%s', FROM_UNIXTIME(%d), '%s')
-    ON DUPLICATE KEY UPDATE jwt = '%s', jwt_exp = FROM_UNIXTIME(%d)`,
-		u.JWTSub, u.Email, u.JWT, u.JWTExp, u.AuthType, u.JWT, u.JWTExp)
+    VALUES(?, ?, ?, FROM_UNIXTIME(?), ?)
+    ON DUPLICATE KEY UPDATE jwt = ?, jwt_exp = FROM_UNIXTIME(?)`
+
+	parameters := [7]interface{}{u.JWTSub, u.Email, u.JWT, u.JWTExp, u.AuthType, u.JWT, u.JWTExp}
+
+	return sql, parameters
 }
 
 func (u *UserAuth) String() string {
