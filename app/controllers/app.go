@@ -34,7 +34,6 @@ func (c App) GetBoardWish() revel.Result {
 		if err := rows.Scan(&wish.Id, &wish.UserId, &wish.Wish, &wish.FontFamily, &wish.FontSize, &wish.FontColor, &wish.BackgroundPic, &wish.Thumbs, &wish.CreatedTimestamp, &wish.UpdatedTimestamp); err != nil {
 			c.Log.Fatal(err.Error())
 		}
-		fmt.Printf("------------\nid %d name is %s\n", wish.Id, wish.Wish)
 		wishes = append(wishes, wish)
 	}
 	if err := rows.Err(); err != nil {
@@ -63,9 +62,9 @@ func (c App) Feedback() revel.Result {
 	bytes, _ := json.Marshal(feedback)
 	print(string(bytes))
 
-	sql := feedback.UpsertSQL()
+	sql, parameters := feedback.UpsertSQL()
 
-	_, err = app.DB.Query(sql)
+	_, err = app.DB.Query(sql, parameters[:]...)
 	if err != nil {
 		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
 		panic(err)

@@ -1,9 +1,5 @@
 package models
 
-import (
-	"fmt"
-)
-
 /**
 CREATE TABLE feedback (
   id INT  UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -20,9 +16,11 @@ type Feedback struct {
 	Message string
 }
 
-func (u *Feedback) UpsertSQL() string {
-	// TODO - Clean message(SQL Injection, etc)
-	return fmt.Sprintf(`
+func (u *Feedback) UpsertSQL() (string, [3]interface{}) {
+	sql := `
     INSERT INTO feedback(user_id, email, message, date)
-    VALUES(%d, '%s', '%s', now())`, u.UserId, u.Email, u.Message)
+    VALUES(?, ?, ?, now())`
+	parameters := [3]interface{}{u.UserId, u.Email, u.Message}
+
+	return sql, parameters
 }

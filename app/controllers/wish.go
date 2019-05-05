@@ -25,9 +25,8 @@ func (c WishApp) GetMyWish() revel.Result {
 	if err != nil {
 		c.Log.Panic(fmt.Sprintf("Invalid User Id: %s", c.Params.Get("user_id")))
 	}
-	sql := fmt.Sprintf("SELECT id, user_id, wish, font_family, font_size, font_color, background_pic, thumbs, created_at, updated_at FROM wish WHERE user_id = %d", userId)
-	fmt.Println(sql)
-	rows, err := app.DB.Query(sql)
+	sql := "SELECT id, user_id, wish, font_family, font_size, font_color, background_pic, thumbs, created_at, updated_at FROM wish WHERE user_id = ?"
+	rows, err := app.DB.Query(sql, userId)
 	if err != nil {
 		c.Log.Panic(fmt.Sprintf("Get wishes for %d failed, error: %s", userId, err.Error))
 	}
@@ -39,7 +38,6 @@ func (c WishApp) GetMyWish() revel.Result {
 		if err := rows.Scan(&wish.Id, &wish.UserId, &wish.Wish, &wish.FontFamily, &wish.FontSize, &wish.FontColor, &wish.BackgroundPic, &wish.Thumbs, &wish.CreatedTimestamp, &wish.UpdatedTimestamp); err != nil {
 			c.Log.Fatal(err.Error())
 		}
-		fmt.Printf("------------\nid %d name is %s\n", wish.Id, wish.Wish)
 		wishes = append(wishes, wish)
 	}
 	if err := rows.Err(); err != nil {
@@ -48,33 +46,14 @@ func (c WishApp) GetMyWish() revel.Result {
 	return c.RenderJSON(wishes)
 }
 
-func (c WishApp) GetWish() revel.Result {
-	c.Log.Info(c.Request.Header.Get("Authorization"))
-
-	wish := models.Wish{
-		Id:               1,
-		UserEmail:        "abc@abc.com",
-		Wish:             "this is my wish 1\nhappy",
-		FontFamily:       "Helvetica",
-		FontSize:         16,
-		FontColor:        "blue",
-		BackgroundPic:    "https://images.pexels.com/photos/17679/pexels-photo.jpg?w=940&h=650&dpr=2&auto=compress&cs=tinysrgb",
-		Thumbs:           1,
-		CreatedTimestamp: 1525506395,
-		UpdatedTimestamp: 0,
-	}
-
-	return c.RenderJSON(wish)
-}
-
 func (c WishApp) DeleteWish(wishId int64) revel.Result {
 	c.Log.Info(c.Request.Header.Get("Authorization"))
 
 	return c.RenderJSON("{}")
 }
 
-func query(sql string, c WishApp) {
-	_, err := app.DB.Query(sql)
+func query(sql string, parameters []interface{}, c WishApp) {
+	_, err := app.DB.Query(sql, parameters[:]...)
 	if err != nil {
 		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
 		panic(err)
@@ -100,9 +79,8 @@ func (c WishApp) PutWish() revel.Result {
 	bytes, _ := json.Marshal(wish)
 	print(string(bytes))
 
-	sql, err := wish.UpsertSQL()
-	print(sql)
-	query(sql, c)
+	sql, parameters, err := wish.UpsertSQL()
+	query(sql, parameters, c)
 
 	return c.RenderJSON("{}")
 }
@@ -122,8 +100,8 @@ func (c WishApp) UpdateThumb() revel.Result {
 		return c.RenderJSON(map[string]interface{}{"message": "Invalid User Id."})
 	}
 
-	sql := fmt.Sprintf("UPDATE wish SET thumbs = thumbs + 1 WHERE id = %d", wishId)
-	_, err = app.DB.Query(sql)
+	sql := "UPDATE wish SET thumbs = thumbs + 1 WHERE id = ?"
+	_, err = app.DB.Query(sql, wishId)
 	if err != nil {
 		c.Log.Error(fmt.Sprintf("Query DB error: %s, (%s)", err.Error, sql))
 		c.Response.Status = http.StatusInternalServerError

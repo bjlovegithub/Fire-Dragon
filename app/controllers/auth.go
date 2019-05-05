@@ -27,8 +27,8 @@ func persistAuth(token string, email string, iss string, exp int64, c Auth) JWTI
 	// save validated token info into db.
 	user := models.UserAuth{JWTSub: iss, Email: email, JWT: token, JWTExp: exp, AuthType: "google"}
 
-	sql := user.UpsertSQL()
-	_, err := app.DB.Query(sql)
+	sql, parameters := user.UpsertSQL()
+	_, err := app.DB.Query(sql, parameters[:]...)
 
 	if err != nil {
 		c.Log.Error(err.Error())

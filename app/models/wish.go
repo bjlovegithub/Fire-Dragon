@@ -38,17 +38,20 @@ func (u *Wish) String() string {
 	return fmt.Sprintf("")
 }
 
-func (u *Wish) UpsertSQL() (string, error) {
+func (u *Wish) UpsertSQL() (string, []interface{}, error) {
 	if u.Wish == "" {
-		return "", errors.New("No wish")
+		return "", []interface{}{}, errors.New("No wish")
 	}
 
 	var sql = ""
+	var parameters []interface{}
 	if u.Id != 0 {
-		sql = fmt.Sprintf("UPDATE wish SET wish = \"%s\", font_family = \"%s\", font_size = %d, font_color = \"%s\", background_pic = \"%s\", updated_at = %d WHERE id = %d", u.Wish, u.FontFamily, u.FontSize, u.FontColor, u.BackgroundPic, u.UpdatedTimestamp, u.Id)
+		sql = "UPDATE wish SET wish = ?, font_family = ?, font_size = ?, font_color = ?, background_pic = ?, updated_at = ? WHERE id = ?"
+		parameters = []interface{}{u.Wish, u.FontFamily, u.FontSize, u.FontColor, u.BackgroundPic, u.UpdatedTimestamp, u.Id}
 	} else {
-		sql = fmt.Sprintf("INSERT INTO wish(user_id, wish, thumbs, font_family, font_size, font_color, background_pic, created_at, updated_at) VALUES(%d, \"%s\", %d, \"%s\", %d, \"%s\", \"%s\", %d, %d)", u.UserId, u.Wish, u.Thumbs, u.FontFamily, u.FontSize, u.FontColor, u.BackgroundPic, u.CreatedTimestamp, u.UpdatedTimestamp)
+		sql = "INSERT INTO wish(user_id, wish, thumbs, font_family, font_size, font_color, background_pic, created_at, updated_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		parameters = []interface{}{u.UserId, u.Wish, u.Thumbs, u.FontFamily, u.FontSize, u.FontColor, u.BackgroundPic, u.CreatedTimestamp, u.UpdatedTimestamp}
 	}
 
-	return sql, nil
+	return sql, parameters, nil
 }

@@ -20,7 +20,9 @@ var (
 var DB *sql.DB
 
 func InitDB() {
-	connstring := fmt.Sprintf("%s:%s@/%s", os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"), "test")
+	connstring := fmt.Sprintf("%s:%s@(%s)/%s",
+		os.Getenv("MYSQL_USER"), os.Getenv("MYSQL_PASS"),
+		os.Getenv("MYSQL_HOST"), os.Getenv("MYSQL_DB"))
 
 	var err error
 	DB, err = sql.Open("mysql", connstring)
