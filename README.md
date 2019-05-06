@@ -11,6 +11,7 @@ Using an self-signed key in Revel.
 
 ### Run locally
 ```docker build --build-arg mysql_user="" --build-arg mysql_pass="" --build-arg mysql_host_port="" --build-arg mysql_db="" --build-arg jwt_sec_key="" -t fire-dragon .```
+
 ```docker run -p 127.0.0.1:443:443 b3b66e45a5bf```
 
 # Deployment
